@@ -6,7 +6,7 @@ Moderation
 Video rating
 Subscriptions
 
-Technologies used:
-Framework - FastAPI
-ORM - ormar
+Technologies used: <br>
+Framework - FastAPI <br>
+ORM - ormar <br>
 DB - Postgresql
