@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class User(BaseModel):
     id: int
@@ -15,3 +15,7 @@ class UploadVideo(BaseModel):
 class GetVideo(BaseModel):
     user: User
     video: UploadVideo
+
+class Message(BaseModel):
+    message: str
+
