@@ -1,5 +1,6 @@
 import shutil
 import filetype
+from uuid import uuid4
 from typing import List
 from starlette.responses import StreamingResponse
 from starlette.templating import Jinja2Templates
@@ -8,26 +9,20 @@ from fastapi import FastAPI, Form, UploadFile, File, APIRouter, BackgroundTasks,
 
 from schemas import UploadVideo, GetVideo, Message
 from models import Video, User
-from services import write_video
+from services import save_video
 
 video_router = APIRouter()
 
 
 @video_router.post("/")
 async def create_video(
-        background_tasks: BackgroundTasks,
+        back_tasks: BackgroundTasks,
         title: str = Form(...),
         description: str = Form(...),
         file: UploadFile = File(...)
 ):
-    file_name = f'media/{file.filename}'
-    if file.content_type == 'video/mp4':
-        background_tasks.add_task(write_video, file_name, file)
-    else:
-        raise HTTPException(status_code=418, detail="Это не mp4")
-    info = UploadVideo(title=title, description=description)
     user = await User.objects.first()
-    return await Video.objects.create(file=file_name, user=user, **info.dict())
+    return await save_video(user, file, title, description, back_tasks)
 
 
 @video_router.get("/video/{video_pk}", responses={404: {"model": Message}})
