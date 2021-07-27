@@ -35,4 +35,5 @@ async def get_video(video_pk: int):
     file = await Video.objects.select_related('user').get(pk=video_pk)
     file_like = open(file.dict().get('file'), mode="rb")
     return StreamingResponse(file_like, media_type="video/mp4")
+#просмотр видео только через postman
 
