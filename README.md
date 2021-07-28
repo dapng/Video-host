@@ -9,4 +9,4 @@ Subscriptions <br>
 Technologies used: <br>
 Framework - FastAPI <br>
 ORM - ormar <br>
-DB - Postgresql
+DB - SQLite
