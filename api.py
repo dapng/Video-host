@@ -11,7 +11,7 @@ from fastapi import FastAPI, Form, UploadFile, File, APIRouter, BackgroundTasks,
 
 from schemas import UploadVideo, GetVideo, Message, GetListVideo
 from models import Video, User
-from services import save_video
+from services import save_video, open_file
 
 video_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -40,6 +40,28 @@ async def get_list_video(user_pk: int):
     return video_list
 
 
-@video_router.get("/index/{video_pk}", response_class=HTMLResponse)
-async def get_video(request: Request, video_pk: int):
-    return templates.TemplateResponse("index.html", {"request": request, "path": video_pk})
+# @video_router.get("/index/{video_pk}", response_class=HTMLResponse)
+# async def get_video(request: Request, video_pk: int):
+#     return templates.TemplateResponse("index.html", {"request": request, "path": video_pk})
+
+
+@video_router.get("/index/{video_pk}")
+async def get_streaming_video(request: Request, video_pk: int) -> StreamingResponse:
+    file, status_code, content_length, headers = await open_file(request, video_pk)
+    response = StreamingResponse(
+        file,
+        media_type='video/mp4',
+        status_code=status_code,
+    )
+
+    response.headers.update({
+        'Accept-Ranges': 'bytes',
+        'Content-Length': str(content_length),
+        **headers
+    })
+    return response
+
+
+@video_router.get("/404", response_class=HTMLResponse)
+async def error_404(request: Request):
+    return templates.TemplateResponse("404.html", {"request": request})
