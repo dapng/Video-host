@@ -2,19 +2,17 @@ import shutil
 import filetype
 from uuid import uuid4
 from typing import List
-
-from starlette.requests import Request
-from starlette.responses import StreamingResponse, HTMLResponse
+from starlette.responses import StreamingResponse
 from starlette.templating import Jinja2Templates
 from fastapi import FastAPI, Form, UploadFile, File, APIRouter, BackgroundTasks, HTTPException
 
 
-from schemas import UploadVideo, GetVideo, Message, GetListVideo
+from schemas import UploadVideo, GetVideo, Message
 from models import Video, User
 from services import save_video
 
 video_router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+
 
 @video_router.post("/")
 async def create_video(
@@ -32,14 +30,5 @@ async def get_video(video_pk: int):
     file = await Video.objects.select_related('user').get(pk=video_pk)
     file_like = open(file.dict().get('file'), mode="rb")
     return StreamingResponse(file_like, media_type="video/mp4")
+#просмотр видео только через postman
 
-
-@video_router.get("/user/{user_pk}", response_model=List[GetListVideo])
-async def get_list_video(user_pk: int):
-    video_list = await Video.objects.filter(user=user_pk).all()
-    return video_list
-
-
-@video_router.get("/index/{video_pk}", response_class=HTMLResponse)
-async def get_video(request: Request, video_pk: int):
-    return templates.TemplateResponse("index.html", {"request": request, "path": video_pk})
