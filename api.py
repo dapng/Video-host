@@ -27,11 +27,11 @@ async def create_video(
     return await save_video(user, file, title, description, back_tasks)
 
 
-@video_router.get("/video/{video_pk}", responses={404: {"model": Message}})
-async def get_video(video_pk: int):
-    file = await Video.objects.select_related('user').get(pk=video_pk)
-    file_like = open(file.dict().get('file'), mode="rb")
-    return StreamingResponse(file_like, media_type="video/mp4")
+# @video_router.get("/video/{video_pk}", responses={404: {"model": Message}})
+# async def get_video(video_pk: int):
+#     file = await Video.objects.select_related('user').get(pk=video_pk)
+#     file_like = open(file.dict().get('file'), mode="rb")
+#     return StreamingResponse(file_like, media_type="video/mp4")
 
 
 @video_router.get("/user/{user_pk}", response_model=List[GetListVideo])
@@ -40,12 +40,12 @@ async def get_list_video(user_pk: int):
     return video_list
 
 
-# @video_router.get("/index/{video_pk}", response_class=HTMLResponse)
-# async def get_video(request: Request, video_pk: int):
-#     return templates.TemplateResponse("index.html", {"request": request, "path": video_pk})
+@video_router.get("/index/{video_pk}", response_class=HTMLResponse)
+async def get_video(request: Request, video_pk: int):
+    return templates.TemplateResponse("index.html", {"request": request, "path": video_pk})
 
 
-@video_router.get("/index/{video_pk}")
+@video_router.get("/video/{video_pk}")
 async def get_streaming_video(request: Request, video_pk: int) -> StreamingResponse:
     file, status_code, content_length, headers = await open_file(request, video_pk)
     response = StreamingResponse(
