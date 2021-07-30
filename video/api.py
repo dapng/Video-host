@@ -6,12 +6,13 @@ from typing import List
 from starlette.requests import Request
 from starlette.responses import StreamingResponse, HTMLResponse
 from starlette.templating import Jinja2Templates
-from fastapi import FastAPI, Form, UploadFile, File, APIRouter, BackgroundTasks, HTTPException
+from fastapi import FastAPI, Form, UploadFile, File, APIRouter, BackgroundTasks, HTTPException, Depends
 
+from user.routers import current_active_user
 
-from schemas import UploadVideo, GetVideo, Message, GetListVideo
-from models import Video, User
-from services import save_video, open_file
+from .schemas import UploadVideo, GetVideo, Message, GetListVideo
+from .models import Video, User
+from .services import save_video, open_file
 
 video_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -21,9 +22,9 @@ async def create_video(
         back_tasks: BackgroundTasks,
         title: str = Form(...),
         description: str = Form(...),
-        file: UploadFile = File(...)
+        file: UploadFile = File(...),
+        user: User = Depends(current_active_user)
 ):
-    user = await User.objects.first()
     return await save_video(user, file, title, description, back_tasks)
 
 
