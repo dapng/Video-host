@@ -1,15 +1,16 @@
-from typing import Optional
-
 from fastapi_users import models
+from pydantic import EmailStr
+
 
 class User(models.BaseUser):
     username: str
+    phone: str
 
-
-class UserCreate(models.BaseUserCreate):
+class UserCreate(models.CreateUpdateDictModel):
     username: str
-    is_active: Optional[bool] = None
-
+    email: EmailStr
+    password: str
+    phone: str
 
 class UserUpdate(User, models.BaseUserUpdate):
     pass

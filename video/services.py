@@ -4,7 +4,6 @@ from typing import IO, Generator
 
 import ormar
 from uuid import uuid4
-import aiofiles
 from fastapi import UploadFile, BackgroundTasks, HTTPException
 from starlette.requests import Request
 
@@ -25,7 +24,7 @@ async def save_video(
     else:
         raise HTTPException(status_code=418, detail="Это не mp4")
     info = UploadVideo(title=title, description=description)
-    return await Video.objects.create(file=file_name, user=user, **info.dict())
+    return await Video.objects.create(file=file_name, user=user.dict(), **info.dict())
 
 def write_video(file_name: str, file: UploadFile):
     with open(file_name, "wb") as buffer:
