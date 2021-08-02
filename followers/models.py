@@ -5,6 +5,7 @@ from db import MainMeta
 
 from user.models import User
 
+
 class Follower(ormar.Model):
     class Meta(MainMeta):
         pass
