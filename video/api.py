@@ -65,3 +65,17 @@ async def get_streaming_video(request: Request, video_pk: int) -> StreamingRespo
 @video_router.get("/404", response_class=HTMLResponse)
 async def error_404(request: Request):
     return templates.TemplateResponse("404.html", {"request": request})
+
+
+@video_router.post("/{video_pk}", status_code=201)
+async def add_like(video_pk: int, user: User = Depends(current_active_user)):
+    _video = await Video.objects.select_related("like_user").get(pk=video_pk)
+    _user = await User.objects.get(id=user.id)
+    if _user in _video.like_user:
+        _video.like_count -= 1
+        await _video.like_user.remove(_user)
+    else:
+        _video.like_count += 1
+        await _video.like_user.add(_user)
+    await _video.update()
+    return _video.like_count
