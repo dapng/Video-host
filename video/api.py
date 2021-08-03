@@ -8,22 +8,22 @@ from starlette.responses import StreamingResponse, HTMLResponse
 from starlette.templating import Jinja2Templates
 from fastapi import FastAPI, Form, UploadFile, File, APIRouter, BackgroundTasks, HTTPException, Depends
 
-from user.auth import current_active_user
+from user.auth import get_user
 
-from .schemas import UploadVideo, GetVideo, Message, GetListVideo
+from .schemas import GetVideo, Message, GetListVideo
 from .models import Video, User
 from .services import save_video, open_file
 
-video_router = APIRouter(tags=["video"])
+video_router = APIRouter(prefix='/video', tags=["video"])
 templates = Jinja2Templates(directory="templates")
 
-@video_router.post("/")
+@video_router.post("/", response_model=GetVideo)
 async def create_video(
         back_tasks: BackgroundTasks,
         title: str = Form(...),
         description: str = Form(...),
         file: UploadFile = File(...),
-        user: User = Depends(current_active_user)
+        user: User = Depends(get_user)
 ):
     return await save_video(user, file, title, description, back_tasks)
 
@@ -35,9 +35,9 @@ async def create_video(
 #     return StreamingResponse(file_like, media_type="video/mp4")
 
 
-@video_router.get("/user/{user_pk}", response_model=List[GetListVideo])
-async def get_list_video(user_pk: str):
-    return await Video.objects.filter(user=user_pk).all()
+@video_router.get("/user/{user_name}", response_model=List[GetListVideo])
+async def get_list_video(user_name: str):
+    return await Video.objects.filter(user__user=user_name).all()
 
 
 @video_router.get("/index/{video_pk}", response_class=HTMLResponse)
@@ -68,7 +68,7 @@ async def error_404(request: Request):
 
 
 @video_router.post("/{video_pk}", status_code=201)
-async def add_like(video_pk: int, user: User = Depends(current_active_user)):
+async def add_like(video_pk: int, user: User = Depends(get_user)):
     _video = await Video.objects.select_related("like_user").get(pk=video_pk)
     _user = await User.objects.get(id=user.id)
     if _user in _video.like_user:
