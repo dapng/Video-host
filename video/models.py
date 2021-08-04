@@ -26,4 +26,3 @@ class Video(ormar.Model):
     like_user: Optional[Union[List[User], Dict]] = ormar.ManyToMany(
         User, related_name="like_users", through=UserLike
     )
-# , through=UserLike
