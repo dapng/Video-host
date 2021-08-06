@@ -1,8 +1,4 @@
-import shutil
-import filetype
-from uuid import uuid4
 from typing import List
-
 from starlette.requests import Request
 from starlette.responses import StreamingResponse, HTMLResponse
 from starlette.templating import Jinja2Templates
@@ -27,7 +23,7 @@ async def create_video(
 ):
     return await save_video(user, file, title, description, back_tasks)
 
-
+# Тест видео показ, без стриминга
 # @video_router.get("/video/{video_pk}", responses={404: {"model": Message}})
 # async def get_video(video_pk: int):
 #     file = await Video.objects.select_related('user').get(pk=video_pk)
@@ -39,12 +35,12 @@ async def create_video(
 async def get_list_video(user_name: str):
     return await Video.objects.filter(user__user=user_name).all()
 
-
+# html плеера, отрисовка
 @video_router.get("/index/{video_pk}", response_class=HTMLResponse)
 async def get_video(request: Request, video_pk: int):
     return templates.TemplateResponse("index.html", {"request": request, "path": video_pk})
 
-
+# стрим видео
 @video_router.get("/video/{video_pk}")
 async def get_streaming_video(request: Request, video_pk: int) -> StreamingResponse:
     file, status_code, content_length, headers = await open_file(request, video_pk)
